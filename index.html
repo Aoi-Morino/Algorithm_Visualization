@@ -1,0 +1,36 @@
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ソートアルゴリズム可視化ツール</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>ソートアルゴリズム可視化ツール</h1>
+        <div class="controls">
+            <label for="array-size">データ数 (5-100):</label>
+            <input type="number" id="array-size" min="5" max="100" value="50">
+            <button id="reset-btn">リセット</button>
+            <button id="start-stop-btn">実行</button>
+        </div>
+        <div class="data-type-controls">
+            <span>データ生成:</span>
+            <label><input type="radio" name="dataType" value="shuffled_unique" checked> 1～N (重複なし)</label>
+            <label><input type="radio" name="dataType" value="random_duplicate"> 1～100 (重複あり)</label>
+        </div>
+        <!-- 速度調整UIを修正 -->
+        <div class="speed-controls">
+            <span>速度 (回/秒):</span>
+            <input type="range" id="speed-slider" min="1" max="100" value="50">
+            <input type="number" id="speed-input" min="1" max="100" value="50">
+        </div>
+    </header>
+
+    <main class="grid-container">
+        <!-- 4つのソートエリアを動的に生成 -->
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
