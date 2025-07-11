@@ -26,8 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'selectionSort': { name: '選択ソート', func: selectionSort },
             'insertionSort': { name: '挿入ソート', func: insertionSort },
             'shellSort': { name: 'シェルソート', func: shellSort },
+            'heapSort': { name: 'ヒープソート', func: heapSort },
             'quickSort': { name: 'クイックソート', func: quickSort },
             'mergeSort': { name: 'マージソート', func: mergeSort },
+            'bucketSort': { name: 'バケットソート', func: bucketSort },
             'beadSort': { name: 'ビーズソート', func: beadSort },
             'bogoSort': { name: 'ボゴソート', func: bogoSort },
             'bozoSort': { name: 'ボゾソート', func: bozoSort },
@@ -268,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- メイン実行ロジック (修正箇所) ---
+    // --- メイン実行ロジック ---
     function runSorters() {
         let allDone = true;
         for (const area of state.sortAreas) {
@@ -281,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             allDone = false;
             
-            // ★★★ 修正点: 最大試行回数を10,000に変更 ★★★
             const isTimeoutAlgo = area.runningAlgoKey === 'bogoSort' || area.runningAlgoKey === 'bozoSort';
             if (isTimeoutAlgo && area.stepCount > 10000) {
                 area.dom.counter.textContent = "TIMEOUT";
@@ -349,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
         area.dom.title.textContent = state.availableAlgorithms[area.runningAlgoKey].name;
     }
 
-    // --- ソートアルゴリズム (変更なし) ---
+    // --- ソートアルゴリズム ---
     function* bubbleSort(areaId){const area=state.sortAreas[areaId],arr=area.data,n=arr.length;for(let i=0;i<n-1;i++)for(let j=0;j<n-i-1;j++)if(yield{action:"draw",areaId:areaId,highlights:{[j]:"compare",[j+1]:"compare"}},arr[j]>arr[j+1])arr[j]=[arr[j+1],arr[j+1]=arr[j]][0],yield{action:"draw",areaId:areaId,highlights:{[j]:"swap",[j+1]:"swap"}}}
     function* shakerSort(areaId){const area=state.sortAreas[areaId],arr=area.data;let left=0,right=arr.length-1,swapped=!0;for(;swapped;){swapped=!1;for(let i=left;i<right;i++)if(yield{action:"draw",areaId:areaId,highlights:{[i]:"compare",[i+1]:"compare"}},arr[i]>arr[i+1])arr[i]=[arr[i+1],arr[i+1]=arr[i]][0],swapped=!0,yield{action:"draw",areaId:areaId,highlights:{[i]:"swap",[i+1]:"swap"}};if(right--,!swapped)break;swapped=!1;for(let i=right;i>left;i--)if(yield{action:"draw",areaId:areaId,highlights:{[i]:"compare",[i-1]:"compare"}},arr[i]<arr[i-1])arr[i]=[arr[i-1],arr[i-1]=arr[i]][0],swapped=!0,yield{action:"draw",areaId:areaId,highlights:{[i]:"swap",[i-1]:"swap"}};left++}}
     function* selectionSort(areaId){const area=state.sortAreas[areaId],arr=area.data,n=arr.length;for(let i=0;i<n-1;i++){let min_idx=i;for(let j=i+1;j<n;j++)yield{action:"draw",areaId:areaId,highlights:{[min_idx]:"pivot",[j]:"compare"}},arr[j]<arr[min_idx]&&(min_idx=j);arr[i]=[arr[min_idx],arr[min_idx]=arr[i]][0],yield{action:"draw",areaId:areaId,highlights:{[i]:"swap",[min_idx]:"swap"}}}}
@@ -360,6 +361,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function* beadSort(areaId){const area=state.sortAreas[areaId],arr=area.data,max=Math.max(...arr);let beads=[];for(let i=0;i<arr.length;i++){beads[i]=new Array(max).fill(0);for(let j=0;j<arr[i];j++)beads[i][j]=1}for(let j=0;j<max;j++){let sum=0;for(let i=0;i<arr.length;i++)sum+=beads[i][j],beads[i][j]=0;for(let i=arr.length-1;i>=arr.length-sum;i--)beads[i][j]=1}for(let i=0;i<arr.length;i++){let sum=0;for(let j=0;j<max;j++)sum+=beads[i][j];if(arr[i]!==sum)arr[i]=sum,yield{action:"draw",areaId:areaId,highlights:{[i]:"swap"}}}}
     function* bogoSort(areaId){const area=state.sortAreas[areaId],arr=area.data;const isSorted=a=>{for(let i=0;i<a.length-1;i++)if(a[i]>a[i+1])return!1;return!0},shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));a[i]=[a[j],a[j]=a[i]][0]}};for(;!isSorted(arr);)shuffle(arr),yield{action:"draw",areaId:areaId,highlights:{}}}
     function* bozoSort(areaId){const area=state.sortAreas[areaId],arr=area.data,n=arr.length,isSorted=a=>{for(let i=0;i<n-1;i++)if(a[i]>a[i+1])return!1;return!0};for(;!isSorted(arr);){const i=Math.floor(Math.random()*n),j=Math.floor(Math.random()*n);arr[i]=[arr[j],arr[j]=arr[i]][0],yield{action:"draw",areaId:areaId,highlights:{[i]:"swap",[j]:"swap"}}}}
+    function* heapSort(areaId) {const area = state.sortAreas[areaId]; const arr = area.data; const n = arr.length; function* heapify(size, i) { let largest = i; const left = 2 * i + 1; const right = 2 * i + 2; if (left < size) { yield { action: 'draw', areaId, highlights: { [largest]: 'pivot', [left]: 'compare' } }; if (arr[left] > arr[largest]) { largest = left; } } if (right < size) { yield { action: 'draw', areaId, highlights: { [largest]: 'pivot', [right]: 'compare' } }; if (arr[right] > arr[largest]) { largest = right; } } if (largest !== i) { [arr[i], arr[largest]] = [arr[largest], arr[i]]; yield { action: 'draw', areaId, highlights: { [i]: 'swap', [largest]: 'swap' } }; yield* heapify(size, largest); } } for (let i = Math.floor(n / 2) - 1; i >= 0; i--) { yield* heapify(n, i); } for (let i = n - 1; i > 0; i--) { [arr[0], arr[i]] = [arr[i], arr[0]]; yield { action: 'draw', areaId, highlights: { [0]: 'swap', [i]: 'swap' } }; yield* heapify(i, 0); }}
+    function* bucketSort(areaId) { const area = state.sortAreas[areaId]; const arr = area.data; const n = arr.length; const bucketSize = 10; const bucketCount = Math.floor(state.maxValue / bucketSize) + 1; const buckets = Array.from({ length: bucketCount }, () => []); for (let i = 0; i < n; i++) { yield { action: 'draw', areaId, highlights: { [i]: 'compare' } }; const bucketIndex = Math.floor((arr[i] - 1) / bucketSize); buckets[bucketIndex].push(arr[i]); } let index = 0; for (let i = 0; i < bucketCount; i++) { const bucket = buckets[i]; for (let j = 1; j < bucket.length; j++) { const key = bucket[j]; let k = j - 1; while (k >= 0 && bucket[k] > key) { bucket[k + 1] = bucket[k]; k--; } bucket[k + 1] = key; } for (let j = 0; j < bucket.length; j++) { arr[index] = bucket[j]; yield { action: 'draw', areaId, highlights: { [index]: 'swap' } }; index++; } } }
 
     // --- アプリケーション開始 ---
     initialize();
